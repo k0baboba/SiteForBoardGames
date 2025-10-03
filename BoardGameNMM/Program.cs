@@ -7,7 +7,7 @@ namespace NineMensMorris
         static void Main(string[] args)
         {
             Game game = new Game();
-            Console.WriteLine("Hello, World!");
+            BoardToString.DrawBoard(game.Board.GetPositionStates());
         }
     }
 }

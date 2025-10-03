@@ -15,6 +15,9 @@ namespace NineMensMorris.Models
         private Player _currentPlayer;
         private GamePhase _currentPhase;
 
+        public static int MoveId { get; private set; } = 0;
+        public Board Board { get { return _board; } }
+
         public Game()
         {
             _board = new Board();
