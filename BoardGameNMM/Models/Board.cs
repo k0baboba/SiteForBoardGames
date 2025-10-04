@@ -67,7 +67,30 @@ namespace NineMensMorris.Models
         };
         }
 
-        public bool IsMoveValid(Move move, Player currentPlayer, GamePhase gamePhase)
+        private readonly List<string[]> _mills = new List<string[]>
+        {
+            // Горизонтальные мельницы (8)
+            new[] { "A1", "A4", "A7" },
+            new[] { "B2", "B4", "B6" },
+            new[] { "C3", "C4", "C5" },
+            new[] { "D1", "D2", "D3" },
+            new[] { "D5", "D6", "D7" },
+            new[] { "E3", "E4", "E5" },
+            new[] { "F2", "F4", "F6" },
+            new[] { "G1", "G4", "G7" },
+    
+            // Вертикальные мельницы (8)
+            new[] { "A1", "D1", "G1" },
+            new[] { "B2", "D2", "F2" },
+            new[] { "C3", "D3", "E3" },
+            new[] { "A4", "B4", "C4" },
+            new[] { "E4", "F4", "G4" },
+            new[] { "C5", "D5", "E5" },
+            new[] { "B6", "D6", "F6" },
+            new[] { "A7", "D7", "G7" }
+        };
+
+        public bool IsMoveValid(Move move, Player currentPlayer)
         {
             string to = move.ToId;
             string from = move.FromId;
@@ -75,7 +98,7 @@ namespace NineMensMorris.Models
             if (!Slots.ContainsKey(to) || Slots[to] != PieceState.None)
                 return false;
 
-            switch (gamePhase)
+            switch (move.Phase)
             {
                 case GamePhase.Placing:
                     // В фазе расстановки from не используется, только to
@@ -84,7 +107,7 @@ namespace NineMensMorris.Models
                 case GamePhase.Moving:
                     return Slots.ContainsKey(from) &&
                            Slots[from] == currentPlayer.PieceColor &&
-                           _neighbors[from].Contains(to); // Но у меня нет _neighbors ПОМОГИ МНЕ ПОЖАЛУЙТСА
+                           _neighbors[from].Contains(to);
 
                 case GamePhase.Flying:
                     return Slots.ContainsKey(from) &&
@@ -96,13 +119,35 @@ namespace NineMensMorris.Models
             }
         }
 
-        public void ApplyMove(Move move)
+        public void ApplyMove(Move move, Player currentPlayer)
         {
-            ;
+            string to = move.ToId;
+            string from = move.FromId;
+
+            if (move.Phase == GamePhase.Placing)
+            {
+                Slots[to] = currentPlayer.PieceColor;
+            }
+            else if (move.Phase == GamePhase.Moving || move.Phase == GamePhase.Flying)
+            {
+                Slots[from] = PieceState.None;
+                Slots[to] = currentPlayer.PieceColor;
+            }
         }
 
-        public bool CheckForMill(int position)
+        public bool CheckForMill(string position, PieceState playerColor)
         {
+            foreach (var mill in _mills)
+            {
+                if (mill.Contains(position))
+                {
+                    if (mill.All(pos => Slots[pos] == playerColor))
+                    {
+                        return true;
+                    }
+                }
+            }
+
             return false;
         }
 
